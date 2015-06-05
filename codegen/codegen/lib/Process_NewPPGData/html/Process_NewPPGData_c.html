@@ -1,0 +1,85 @@
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<title>RTW Report - Process_NewPPGData.c</title>
+<script language="JavaScript" type="text/javascript" src="rtwreport_utils.js"></script>
+</head>
+<body bgcolor="#eeeeee" text="#1122aa" onload="try {if (top) { if (top.rtwFileOnLoad) top.rtwFileOnLoad(window.document); else local_onload();}} catch(err) {};">
+<p>
+<table border="0" cellspacing="0" cellpadding="6" width="100%%" height="100%%"><tr><td width="100%%" valign="top" bgcolor="#ffffff">
+<h4>File: <a href="../Process_NewPPGData.c" target="rtwreport_document_frame" id="linkToText_plain">Process_NewPPGData.c</a></h4>
+<pre id="RTWcode">
+<a name="1"><font color="#888888 "><i>    1   </i></font></a><font color="#117755"><i>/*</i></font>
+<a name="2"><font color="#888888 "><i>    2   </i></font></a><font color="#117755"><I> * Process_NewPPGData.c</i></font>
+<a name="3"><font color="#888888 "><i>    3   </i></font></a><font color="#117755"><I> *</i></font>
+<a name="4"><font color="#888888 "><i>    4   </i></font></a><font color="#117755"><I> * Code generation for function 'Process_NewPPGData'</i></font>
+<a name="5"><font color="#888888 "><i>    5   </i></font></a><font color="#117755"><I> *</i></font>
+<a name="6"><font color="#888888 "><i>    6   </i></font></a><font color="#117755"><I> */</i></font>
+<a name="7"><font color="#888888 "><i>    7   </i></font></a>
+<a name="8"><font color="#888888 "><i>    8   </i></font></a><font color="#117755"><i>/* Include files */</i></font>
+<a name="9"><font color="#888888 "><i>    9   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;rt_nonfinite.h&quot;</font>
+<a name="10"><font color="#888888 "><i>   10   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;Process_NewPPGData.h&quot;</font>
+<a name="11"><font color="#888888 "><i>   11   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;PulseRateFilter_Experimental.h&quot;</font>
+<a name="12"><font color="#888888 "><i>   12   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;initFilt_struct.h&quot;</font>
+<a name="13"><font color="#888888 "><i>   13   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;initPPG_struct.h&quot;</font>
+<a name="14"><font color="#888888 "><i>   14   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;stillness_update_eff.h&quot;</font>
+<a name="15"><font color="#888888 "><i>   15   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;PulseRateFilter.h&quot;</font>
+<a name="16"><font color="#888888 "><i>   16   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;PPG_algorithm.h&quot;</font>
+<a name="17"><font color="#888888 "><i>   17   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;filterloopBPF07_30_26Hz.h&quot;</font>
+<a name="18"><font color="#888888 "><i>   18   </i></font></a><font color="#992211">#</font><font color="#992211"><b>include</b></font> <font color="#992211">&quot;rdivide.h&quot;</font>
+<a name="19"><font color="#888888 "><i>   19   </i></font></a>
+<a name="20"><font color="#888888 "><i>   20   </i></font></a><font color="#117755"><i>/* Function Definitions */</i></font>
+<a name="21"><font color="#888888 "><i>   21   </i></font></a><font color="#112266"><b>void</b></font> <a name="fcn_Process_NewPPGData">Process_NewPPGData</a>(<font color="#112266"><b>float</b></font> RawSensorSum, <font color="#112266"><b>unsigned</b></font> <font color="#112266"><b>char</b></font> NumberOfLEDPulses,
+<a name="22"><font color="#888888 "><i>   22   </i></font></a>  <a href="Process_NewPPGData_types_h.html#type_struct0_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_struct0_T');" target="_self"><font color="#1122aa">struct0_T</font></a> *PPG_struct, <a href="Process_NewPPGData_types_h.html#type_struct1_T" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'type_struct1_T');" target="_self"><font color="#1122aa">struct1_T</font></a> *Filt_struct)
+<a name="23"><font color="#888888 "><i>   23   </i></font></a><b>{</b>
+<a name="24"><font color="#888888 "><i>   24   </i></font></a>  <font color="#112266"><b>float</b></font> y;
+<a name="25"><font color="#888888 "><i>   25   </i></font></a>  <font color="#112266"><b>int</b></font> i;
+<a name="26"><font color="#888888 "><i>   26   </i></font></a>
+<a name="27"><font color="#888888 "><i>   27   </i></font></a>  <font color="#117755"><i>/*  This function is to be called when there is new PPG data */</i></font>
+<a name="28"><font color="#888888 "><i>   28   </i></font></a>  <font color="#117755"><i>/* IF Bias point changes, which can be detected by noticing a change in the */</i></font>
+<a name="29"><font color="#888888 "><i>   29   </i></font></a>  <font color="#117755"><i>/*  number of LED Pulses, then preset BPFilter taps to new datapoint */</i></font>
+<a name="30"><font color="#888888 "><i>   30   </i></font></a>  <font color="#117755"><i>/*  This Filter reset is a quick recovery stategy */</i></font>
+<a name="31"><font color="#888888 "><i>   31   </i></font></a>  <font color="#112266"><b>if</b></font> (NumberOfLEDPulses != PPG_struct-&gt;NumberOfLEDPulses) <b>{</b>
+<a name="32"><font color="#888888 "><i>   32   </i></font></a>    y = <a href="rdivide_c.html#fcn_rdivide" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'fcn_rdivide');" target="_self"><font color="#1122aa">rdivide</font></a>(RawSensorSum, Filt_struct-&gt;k_BPF_GAIN);
+<a name="33"><font color="#888888 "><i>   33   </i></font></a>    <font color="#112266"><b>for</b></font> (i = 0; i &lt; 9; i++) <b>{</b>
+<a name="34"><font color="#888888 "><i>   34   </i></font></a>      Filt_struct-&gt;xv[i] = y;
+<a name="35"><font color="#888888 "><i>   35   </i></font></a>      Filt_struct-&gt;yv[i] = 0.0F;
+<a name="36"><font color="#888888 "><i>   36   </i></font></a>    <b>}</b>
+<a name="37"><font color="#888888 "><i>   37   </i></font></a>
+<a name="38"><font color="#888888 "><i>   38   </i></font></a>    PPG_struct-&gt;IgnoreFirstPulses = 4;
+<a name="39"><font color="#888888 "><i>   39   </i></font></a>
+<a name="40"><font color="#888888 "><i>   40   </i></font></a>    <font color="#117755"><i>/*  notify the pulse rate filter */</i></font>
+<a name="41"><font color="#888888 "><i>   41   </i></font></a>  <b>}</b>
+<a name="42"><font color="#888888 "><i>   42   </i></font></a>
+<a name="43"><font color="#888888 "><i>   43   </i></font></a>  PPG_struct-&gt;NumberOfLEDPulses = NumberOfLEDPulses;
+<a name="44"><font color="#888888 "><i>   44   </i></font></a>  <a href="filterloopBPF07_30_26Hz_c.html#fcn_filterloopBPF07_30_26Hz" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'fcn_filterloopBPF07_30_26Hz');" target="_self"><font color="#1122aa">filterloopBPF07_30_26Hz</font></a>(RawSensorSum, Filt_struct);
+<a name="45"><font color="#888888 "><i>   45   </i></font></a>
+<a name="46"><font color="#888888 "><i>   46   </i></font></a>  <font color="#117755"><i>/* BPFilter incoming samples */</i></font>
+<a name="47"><font color="#888888 "><i>   47   </i></font></a>  PPG_struct-&gt;FilteredDataInput = Filt_struct-&gt;yv[8];
+<a name="48"><font color="#888888 "><i>   48   </i></font></a>
+<a name="49"><font color="#888888 "><i>   49   </i></font></a>  <font color="#117755"><i>/*  extract results */</i></font>
+<a name="50"><font color="#888888 "><i>   50   </i></font></a>  <font color="#117755"><i>/* Process new datapoint */</i></font>
+<a name="51"><font color="#888888 "><i>   51   </i></font></a>  <a href="PPG_algorithm_c.html#fcn_PPG_algorithm" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'fcn_PPG_algorithm');" target="_self"><font color="#1122aa">PPG_algorithm</font></a>(PPG_struct);
+<a name="52"><font color="#888888 "><i>   52   </i></font></a>
+<a name="53"><font color="#888888 "><i>   53   </i></font></a>  <font color="#117755"><i>/*  run data through algorithm */</i></font>
+<a name="54"><font color="#888888 "><i>   54   </i></font></a>  <font color="#117755"><i>/*  -Filter Pulse Rate Value (if there is a new one) -*********************** % */</i></font>
+<a name="55"><font color="#888888 "><i>   55   </i></font></a>  <a href="PulseRateFilter_c.html#fcn_PulseRateFilter" onclick="if (top) if (top.docHiliteMe) top.docHiliteMe(window, 'fcn_PulseRateFilter');" target="_self"><font color="#1122aa">PulseRateFilter</font></a>(PPG_struct);
+<a name="56"><font color="#888888 "><i>   56   </i></font></a>
+<a name="57"><font color="#888888 "><i>   57   </i></font></a>  <font color="#117755"><i>/* [PPG_struct] = PulseRateFilter_Experimental(PPG_struct); */</i></font>
+<a name="58"><font color="#888888 "><i>   58   </i></font></a>  <font color="#112266"><b>if</b></font> (PPG_struct-&gt;IgnoreFirstPulses &gt; 0) <b>{</b>
+<a name="59"><font color="#888888 "><i>   59   </i></font></a>    i = PPG_struct-&gt;IgnoreFirstPulses - 1;
+<a name="60"><font color="#888888 "><i>   60   </i></font></a>    <font color="#112266"><b>if</b></font> (i &lt; -128) <b>{</b>
+<a name="61"><font color="#888888 "><i>   61   </i></font></a>      i = -128;
+<a name="62"><font color="#888888 "><i>   62   </i></font></a>    <b>}</b>
+<a name="63"><font color="#888888 "><i>   63   </i></font></a>
+<a name="64"><font color="#888888 "><i>   64   </i></font></a>    PPG_struct-&gt;IgnoreFirstPulses = (<font color="#112266"><b>signed</b></font> <font color="#112266"><b>char</b></font>)i;
+<a name="65"><font color="#888888 "><i>   65   </i></font></a>  <b>}</b>
+<a name="66"><font color="#888888 "><i>   66   </i></font></a><b>}</b>
+<a name="67"><font color="#888888 "><i>   67   </i></font></a>
+<a name="68"><font color="#888888 "><i>   68   </i></font></a><font color="#117755"><i>/* End of code generation (Process_NewPPGData.c) */</i></font>
+<a name="69"><font color="#888888 "><i>   69   </i></font></a></pre>
+</td></tr></table>
+</p>
+</body>
+</html>
